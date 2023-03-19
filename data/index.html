@@ -1,0 +1,207 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Grillthermometer</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="main.css" />
+		
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header" class="alt">
+						<span class="logo"><img src="logo.jpg" alt="" /></span>
+						
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul>
+							<li><a href="#intro">Thermometer</a></li>
+							<li><a href="#first">Temperaturverlauf</a></li>
+							<li><a href="#second">Kochbuch</a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Introduction -->
+							<section id="intro" class="main">
+								<div class="spotlight">
+									<div class="content">
+																	
+										
+  <p>
+    <span class="sensor-labels">Kern Temperatur</span>
+    <span id="temperature1">*</span>
+    <sup class="units">&deg;C</sup>
+  </p>
+  
+  <p>
+    <span class="sensor-labels">Grillrost Temperatur</span>
+    <span id="temperature2">*</span>
+    <sup class="units">&deg;C</sup>
+  </p>
+  
+   
+  <select id="auswahl" name = "auswahl">
+  <option value = "55" >Rind 55 Grad</option>
+  <option value = "65" >Schwein 65 Grad </option>
+  <option value = "72" >Rind 72 Grad</option>
+  <option value = "70" >Kalb 70 Grad</option>
+  <option value = "80" >Geflügel 80 Grad</option>
+  <option value = "52" >Fisch 52 Grad</option>
+  <option value = "75" >Wild 73 Grad</option>
+  <option value = "72" >Pulled Pork 68 Grad</option>
+  </select> 
+  
+</p>
+										
+</div>
+							</section>
+
+						<!-- First Section -->
+							<section id="first" class="main special">
+								
+								<ul class="features">
+									
+<div>
+  <canvas id="myChart"></canvas>
+  <canvas width="600" height="100">
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.3.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/luxon@1.27.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.0.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@2.0.0"></script>
+
+
+<script>
+  const ctx = document.getElementById('myChart');
+const myChart = new Chart(ctx, {
+  type: 'line',             // 'line', 'bar', 'bubble' and 'scatter' types are supported
+  data: {
+    datasets: [{
+	label: 'Kern Temperatur',
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        borderColor: 'rgb(255, 99, 132)',
+        borderDash: [8, 4],
+        fill: true,
+      data: []              // empty at the beginning
+    }]
+  },
+  options: {
+    scales: {
+      x: {
+        type: 'realtime',   // x axis will auto-scroll from right to left
+        realtime: {         // per-axis options
+          duration: 20000,  // data in the past 20000 ms will be displayed
+          refresh: 1000,    // onRefresh callback will be called every 1000 ms
+          delay: 1000,      // delay of 1000 ms, so upcoming values are known before plotting a line
+          pause: false,     // chart is not paused
+          ttl: undefined,   // data will be automatically deleted as it disappears off the chart
+          frameRate: 30,    // data points are drawn 30 times every second
+       onRefresh: function(chart) {
+            chart.data.datasets.forEach(function(dataset) {
+              dataset.data.push({
+                 x: Date.now(),
+                 y:  document.getElementById("temperature1").innerHTML
+              });
+            });
+          }
+        }
+      }
+    }
+  }
+});   
+ 
+
+</script>
+
+    
+								   
+								</ul>
+								
+							</section>
+
+						<!-- Second Section -->
+							<section id="second" class="main special">
+								<header class="major">
+									<h2>Kochbücher</h2>
+								</header>
+							
+								</ul>
+								
+								<footer class="major">
+									<ul class="actions special">
+										<li><a href="https://broilkingbbq.com/de_de/rezepte/" class="button">Broilking</a></li>
+										<li><a href="https://www.weber.com/DE/de/rezepte/weber-31811.html" class="button">Weber</a></li>
+										<li><a href="https://www.chefkoch.de/rs/s0/grillige/Rezepte.html" class="button">Chefkoch</a></li>
+										<li><a href="https://www.grillsportverein.de/grillrezepte/" class="button">Grillsportverein</a></li>
+										<li><a href="https://www.grillkameraden.de/grillrezepte" class="button">Grillkameraden</a></li>
+									</ul>
+								</footer>
+							</section>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<section>
+							<h2>Thorsten Bonné</h2>
+						</section>
+					
+						
+					</footer>
+
+			</div>
+
+		<!-- Scripts -->
+
+<script>
+
+  setInterval(function ( ) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        document.getElementById("temperature1").innerHTML = this.responseText;
+
+        // Temperatur pruefen
+        var idx = document.getElementById("auswahl").selectedIndex;       
+        var temp = document.getElementById("auswahl").options[idx].value;
+
+        // Essen fertig ?
+        if ( this.responseText >= temp ) {
+           document.getElementById("temperature1").style="color: red;";
+		   alert("Essen fertig!");
+		}
+        else {
+           document.getElementById("temperature1").style="color: black;";
+        }
+
+         
+      }
+    };
+    xhttp.open("GET", "/temperature1", true);
+    xhttp.send();
+  }, 1000 ) ;
+
+  setInterval(function ( ) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        document.getElementById("temperature2").innerHTML = this.responseText;
+      }
+    };
+    xhttp.open("GET", "/temperature2", true);
+    xhttp.send();
+  }, 1000 ) ;
+
+</script>
+
+	</body>
+</html>
